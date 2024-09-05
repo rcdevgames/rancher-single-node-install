@@ -1,7 +1,17 @@
 #!/bin/sh
 
+# Periksa jumlah argumen
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <hostname> <email>"
+    exit 1
+fi
+
+# Ambil parameter dari baris perintah
+HOSTNAME=$1
+EMAIL=$2
+
 echo "Installing K3S"
-curl  -sfL https://get.k3s.io  | INSTALL_K3S_VERSION="1.24.9+k3s1" sh -s - --write-kubeconfig-mode 644
+curl  -sfL https://get.k3s.io  | INSTALL_K3S_VERSION="v1.30.4+k3s1" sh -s - --write-kubeconfig-mode 644
 
 sudo chmod 747 /var/lib/rancher/k3s/server/manifests/ # Write permissions granted for other users not in the root usergroup. This currently doesn't work!
 
@@ -38,14 +48,14 @@ metadata:
   namespace: kube-system
 spec:
   targetNamespace: cattle-system
-  version: v2.7.0
+  version: v2.9.1
   chart: rancher
   repo: https://releases.rancher.com/server-charts/latest
   set:
     ingress.tls.source: "letsEncrypt"
     letsEncrypt.ingress.class: "traefik"
-    letsEncrypt.email: "MY-EMAIL"
-    hostname: "MY-ADDRESS.sslip.io"
+    letsEncrypt.email: "$EMAIL"
+    hostname: "$HOSTNAME"
     antiAffinity: "required"
     replicas: 1
 EOF
